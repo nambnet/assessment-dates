@@ -66,6 +66,7 @@
 
     var displayCols = ['Retreat Dates', 'Location', 'Registration Deadline', 'Region'];
     var frag = document.createDocumentFragment();
+    var lastYear = '';
 
     for (var s = 0; s < order.length; s++) {
       var sn = order[s];
@@ -82,6 +83,19 @@
       }
 
       if (rows.length === 0) continue;
+
+      // Add year h1 when the year changes
+      var year = sn.split(' ').pop();
+      if (year !== lastYear) {
+        var h1 = document.createElement('h1');
+        var span = document.createElement('span');
+        span.style.fontSize = '54px';
+        span.style.letterSpacing = '-1.3px';
+        span.textContent = year + ' Assessment Retreat Dates';
+        h1.appendChild(span);
+        frag.appendChild(h1);
+        lastYear = year;
+      }
 
       var heading = document.createElement('h3');
       heading.textContent = sn;
