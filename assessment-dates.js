@@ -12,6 +12,28 @@
 
   var HIDE_PAST = true;
 
+  // Excel serial number to date string (e.g. 46001 -> "December 10, 2025")
+  var MONTHS = ['January','February','March','April','May','June',
+    'July','August','September','October','November','December'];
+  function serialToDate(val) {
+    if (!val) return '';
+    // If already a string with letters, return as-is
+    if (typeof val === 'string' && val.match(/[a-zA-Z]/)) return val;
+    var num = Number(val);
+    if (isNaN(num)) return val;
+    // Excel epoch: Jan 1, 1900 = serial 1 (with the leap year bug offset)
+    var d = new Date(Date.UTC(1899, 11, 30 + num));
+    return MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+  }
+
+  // Get retreat dates field - handle both "Retreat Dates" and "RetreatDates"
+  function getField(row, name) {
+    if (row[name] !== undefined) return row[name];
+    var noSpace = name.replace(/ /g, '');
+    if (row[noSpace] !== undefined) return row[noSpace];
+    return '';
+  }
+
   function parseEndDate(dateStr) {
     if (!dateStr) return null;
     var parts = dateStr.split(',');
@@ -42,7 +64,7 @@
       groups[season].push(row);
     }
 
-    var cols = ['Retreat Dates', 'Location', 'Registration Deadline', 'Region'];
+    var displayCols = ['Retreat Dates', 'Location', 'Registration Deadline', 'Region'];
     var frag = document.createDocumentFragment();
 
     for (var s = 0; s < order.length; s++) {
@@ -52,7 +74,8 @@
       if (HIDE_PAST) {
         var filtered = [];
         for (var j = 0; j < rows.length; j++) {
-          var ed = parseEndDate(rows[j][cols[0]]);
+          var dateVal = getField(rows[j], 'Retreat Dates');
+          var ed = parseEndDate(dateVal);
           if (ed && ed >= now) filtered.push(rows[j]);
         }
         rows = filtered;
@@ -70,9 +93,9 @@
       tbl.className = 'table table-bordered table-hover';
       var thead = document.createElement('thead');
       var headerRow = document.createElement('tr');
-      for (var c = 0; c < cols.length; c++) {
+      for (var c = 0; c < displayCols.length; c++) {
         var th = document.createElement('td');
-        th.textContent = cols[c];
+        th.textContent = displayCols[c];
         headerRow.appendChild(th);
       }
       thead.appendChild(headerRow);
@@ -81,9 +104,14 @@
       var tbody = document.createElement('tbody');
       for (var k = 0; k < rows.length; k++) {
         var tr = document.createElement('tr');
-        for (var c2 = 0; c2 < cols.length; c2++) {
+        for (var c2 = 0; c2 < displayCols.length; c2++) {
           var cell = document.createElement('td');
-          cell.textContent = rows[k][cols[c2]] || '';
+          var val = getField(rows[k], displayCols[c2]);
+          // Convert serial numbers for deadline column
+          if (displayCols[c2] === 'Registration Deadline') {
+            val = serialToDate(val);
+          }
+          cell.textContent = val || '';
           tr.appendChild(cell);
         }
         tbody.appendChild(tr);
