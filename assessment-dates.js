@@ -64,7 +64,10 @@
       heading.textContent = sn;
       frag.appendChild(heading);
 
+      var wrapper = document.createElement('div');
+      wrapper.className = 'table-responsive';
       var tbl = document.createElement('table');
+      tbl.className = 'table table-bordered table-hover';
       var thead = document.createElement('thead');
       var headerRow = document.createElement('tr');
       for (var c = 0; c < cols.length; c++) {
@@ -86,7 +89,8 @@
         tbody.appendChild(tr);
       }
       tbl.appendChild(tbody);
-      frag.appendChild(tbl);
+      wrapper.appendChild(tbl);
+      frag.appendChild(wrapper);
     }
 
     if (frag.childNodes.length === 0) {
