@@ -56,6 +56,9 @@
     var order = [];
     for (var i = 0; i < data.length; i++) {
       var row = data[i];
+      // Only show rows where Published = "Yes"
+      var published = getField(row, 'Published');
+      if (published && published.toString().toLowerCase() !== 'yes') continue;
       var season = row.Season || 'Other';
       if (!groups[season]) {
         groups[season] = [];
