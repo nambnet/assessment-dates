@@ -37,9 +37,17 @@
   function parseEndDate(dateStr) {
     if (!dateStr) return null;
     var parts = dateStr.split(',');
-    if (parts.length < 2) return null;
-    var year = parts[parts.length - 1].trim();
-    var datePart = parts[0].trim();
+    var year, datePart;
+    if (parts.length >= 2) {
+      year = parts[parts.length - 1].trim();
+      datePart = parts[0].trim();
+    } else {
+      // Handle missing comma, e.g. "February 18-19 2027"
+      var yearMatch = dateStr.match(/(\d{4})\s*$/);
+      if (!yearMatch) return null;
+      year = yearMatch[1];
+      datePart = dateStr.slice(0, yearMatch.index).trim();
+    }
     var crossMonth = datePart.match(/\w+\s+\d+-(\w+)\s+(\d+)/);
     if (crossMonth) return new Date(crossMonth[1] + ' ' + crossMonth[2] + ', ' + year);
     var sameMonth = datePart.match(/(\w+)\s+\d+-(\d+)/);
